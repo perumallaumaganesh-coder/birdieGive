@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String      @id @default(uuid())
+  email              String      @unique
+  passwordHash       String
+  role               String      @default("USER")
+  subscriptionStatus String      @default("INACTIVE")
+  subscriptionEndsAt DateTime?
+  charityPercentage  Int         @default(10)
+  charityId          String?
+  charity            Charity?    @relation(fields: [charityId], references: [id])
+  scores             Score[]
+  drawEntries        DrawEntry[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model Score {
+  id        String   @id @default(uuid())
+  points    Int
+  date      DateTime
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model Charity {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  imageUrl    String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Draw {
+  id             String      @id @default(uuid())
+  month          String
+  winningNumbers String      @default("")
+  status         String      @default("SIMULATED")
+  totalPool      Float       @default(0)
+  entries        DrawEntry[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model DrawEntry {
+  id          String   @id @default(uuid())
+  numbers     String   @default("")
+  matches     Int      @default(0)
+  prizeAmount Float    @default(0)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  drawId      String
+  draw        Draw     @relation(fields: [drawId], references: [id])
+  createdAt   DateTime @default(now())
+}
