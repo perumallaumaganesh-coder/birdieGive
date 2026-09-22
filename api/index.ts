@@ -8,7 +8,8 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-// Vercel strips the /api prefix before forwarding to this handler
+// Support both stripped and unstripped /api routes seamlessly
+app.use('/api', apiRoutes);
 app.use(apiRoutes);
 
 export default app;
